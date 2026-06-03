@@ -3,19 +3,18 @@
 import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
 
-  const orderId =
-    searchParams.get("orderId");
+  const orderId = searchParams.get("orderId");
 
   return (
     <>
       <Navbar />
 
       <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-
         <div className="text-center max-w-2xl">
 
           <h1 className="font-serif text-6xl mb-6 text-yellow-500">
@@ -27,7 +26,6 @@ export default function OrderSuccessPage() {
           </p>
 
           <div className="bg-zinc-900 p-6 rounded-2xl mb-8">
-
             <p className="text-zinc-400 mb-2">
               Tracking ID
             </p>
@@ -35,7 +33,6 @@ export default function OrderSuccessPage() {
             <p className="text-lg break-all text-yellow-500">
               {orderId}
             </p>
-
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center">
@@ -57,8 +54,15 @@ export default function OrderSuccessPage() {
           </div>
 
         </div>
-
       </main>
     </>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

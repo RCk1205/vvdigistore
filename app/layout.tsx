@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "../context/CartContext";
+import AuthProvider from "../components/AuthProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -28,11 +29,13 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${inter.variable} h-full antialiased`}
     >
-<body className="min-h-full flex flex-col">
-  <CartProvider>
-    {children}
-  </CartProvider>
-</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

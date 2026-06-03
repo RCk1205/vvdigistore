@@ -1,17 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag, Search, User } from "lucide-react";
+import {
+  ShoppingBag,
+  Search,
+  User,
+  LogOut,
+} from "lucide-react";
+
 import { useCart } from "../context/CartContext";
+
+import {
+  useSession,
+  signOut,
+} from "next-auth/react";
 
 export default function Navbar() {
   const { cart } = useCart();
+
+  const { data: session } =
+    useSession();
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-black/40 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
 
-        {/* Logo */}
         <Link
           href="/"
           className="font-serif text-4xl text-yellow-500 tracking-wide"
@@ -19,79 +32,62 @@ export default function Navbar() {
           LUXURY
         </Link>
 
-        {/* Navigation */}
         <ul className="hidden md:flex items-center gap-8 text-white">
 
           <li>
-            <Link
-              href="/"
-              className="transition-all duration-300 hover:text-yellow-500 hover:-translate-y-1"
-            >
+            <Link href="/">
               Home
             </Link>
           </li>
 
           <li>
-            <Link
-              href="/about"
-              className="transition-all duration-300 hover:text-yellow-500 hover:-translate-y-1"
-            >
+            <Link href="/about">
               About
             </Link>
           </li>
 
           <li>
-            <Link
-              href="/products"
-              className="transition-all duration-300 hover:text-yellow-500 hover:-translate-y-1"
-            >
+            <Link href="/products">
               Products
             </Link>
           </li>
 
           <li>
-            <Link
-              href="/gallery"
-              className="transition-all duration-300 hover:text-yellow-500 hover:-translate-y-1"
-            >
+            <Link href="/gallery">
               Gallery
             </Link>
           </li>
 
           <li>
-            <Link
-              href="/blog"
-              className="transition-all duration-300 hover:text-yellow-500 hover:-translate-y-1"
-            >
+            <Link href="/blog">
               Blog
             </Link>
           </li>
 
           <li>
-            <Link
-              href="/contact"
-              className="transition-all duration-300 hover:text-yellow-500 hover:-translate-y-1"
-            >
+            <Link href="/contact">
               Contact
             </Link>
           </li>
 
         </ul>
 
-        {/* Icons */}
         <div className="flex items-center gap-4 text-white">
 
           <Link href="/products">
-  <Search
-    size={20}
-    className="cursor-pointer hover:text-yellow-500 transition-colors"
-  />
-</Link>
+            <Search
+              size={20}
+              className="cursor-pointer hover:text-yellow-500"
+            />
+          </Link>
 
-          <Link href="/cart" className="relative">
+          <Link
+            href="/cart"
+            className="relative"
+          >
             <ShoppingBag
               size={20}
-              className="cursor-pointer hover:text-yellow-500 transition-colors"
+              className="cursor-pointer hover:text-yellow-500"
             />
 
             {cart.length > 0 && (
@@ -101,10 +97,34 @@ export default function Navbar() {
             )}
           </Link>
 
-          <User
-            size={20}
-            className="cursor-pointer hover:text-yellow-500 transition-colors"
-          />
+          {session ? (
+            <>
+              <span className="hidden md:block text-sm text-yellow-500">
+                {session.user?.email}
+              </span>
+
+              <button
+                onClick={() =>
+                  signOut({
+                    callbackUrl:
+                      "/login",
+                  })
+                }
+              >
+                <LogOut
+                  size={20}
+                  className="cursor-pointer hover:text-red-500"
+                />
+              </button>
+            </>
+          ) : (
+            <Link href="/login">
+              <User
+                size={20}
+                className="cursor-pointer hover:text-yellow-500"
+              />
+            </Link>
+          )}
 
         </div>
 

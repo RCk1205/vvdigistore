@@ -9,14 +9,8 @@ const handler = NextAuth({
       name: "credentials",
 
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-        },
-        password: {
-          label: "Password",
-          type: "password",
-        },
+        email: {},
+        password: {},
       },
 
       async authorize(credentials) {
@@ -40,13 +34,13 @@ const handler = NextAuth({
           return null;
         }
 
-        const passwordMatch =
+        const validPassword =
           await bcrypt.compare(
             credentials.password,
             user.password
           );
 
-        if (!passwordMatch) {
+        if (!validPassword) {
           return null;
         }
 
@@ -54,16 +48,39 @@ const handler = NextAuth({
           id: user._id.toString(),
           name: user.name,
           email: user.email,
+          role: user.role,
         };
       },
     }),
   ],
 
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role =
+          (user as any).role;
+      }
+
+      return token;
+    },
+
+    async session({
+      session,
+      token,
+    }) {
+      (session.user as any).role =
+        token.role;
+
+      return session;
+    },
+  },
+
   session: {
     strategy: "jwt",
   },
 
-  secret: process.env.NEXTAUTH_SECRET,
+  secret:
+    process.env.NEXTAUTH_SECRET,
 });
 
 export { handler as GET, handler as POST };

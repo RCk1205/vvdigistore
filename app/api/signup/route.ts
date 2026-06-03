@@ -26,11 +26,12 @@ export async function POST(req: Request) {
       await bcrypt.hash(password, 10);
 
     await users.insertOne({
-      name,
-      email,
-      password: hashedPassword,
-      createdAt: new Date(),
-    });
+  name,
+  email,
+  password: hashedPassword,
+  role: "customer",
+  createdAt: new Date(),
+});
 
     return Response.json({
       success: true,

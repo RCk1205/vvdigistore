@@ -19,10 +19,14 @@ export async function POST(
         currency: "INR",
       });
 
-    return Response.json(order);
+    return Response.json({
+      success: true,
+      order,
+    });
   } catch (error) {
     return Response.json(
       {
+        success: false,
         error:
           "Failed to create order",
       },

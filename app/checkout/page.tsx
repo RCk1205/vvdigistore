@@ -2,23 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
-import Script from "next/script";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
 
-  const {
-    cart,
-    clearCart,
-  } = useCart();
+  const { cart, clearCart } = useCart();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
+
   const [paymentMethod, setPaymentMethod] =
     useState("Cash on Delivery");
 
@@ -26,130 +30,221 @@ export default function CheckoutPage() {
     (sum, item) =>
       sum +
       Number(
-        item.price.toString().replace(/[$,₹]/g, "")
+        item.price
+          .toString()
+          .replace(/[$,₹]/g, "")
       ) *
         item.quantity,
     0
   );
-const handleRazorpayPayment = async () => {
-  try {
+
+  const validateForm = () => {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !phone.trim() ||
+      !city.trim() ||
+      !address.trim()
+    ) {
+      alert(
+        "Please fill all required fields."
+      );
+      return false;
+    }
+
+    if (cart.length === 0) {
+      alert("Your cart is empty.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const saveOrder = async () => {
+    const orderData = {
+      customer: {
+        name,
+        email,
+        phone,
+        city,
+        address,
+      },
+      paymentMethod,
+      items: cart,
+      total,
+    };
+
     const response = await fetch(
-      "/api/create-order",
+      "/api/orders",
       {
         method: "POST",
         headers: {
           "Content-Type":
             "application/json",
         },
-        body: JSON.stringify({
-          amount: total,
-        }),
+        body: JSON.stringify(orderData),
       }
     );
 
-    const order =
+    const data =
       await response.json();
 
-    const options = {
-      key:
-        process.env
-          .NEXT_PUBLIC_RAZORPAY_KEY_ID,
-
-      amount: order.amount,
-
-      currency: order.currency,
-
-      name: "Luxury Store",
-
-      description:
-        "Order Payment",
-
-      order_id: order.id,
-
-      handler: function (
-        response: any
-      ) {
-        alert(
-          "Payment Successful"
-        );
-
-        console.log(response);
-      },
-
-      theme: {
-        color: "#EAB308",
-      },
-    };
-
-    const razorpay =
-      new (window as any).Razorpay(
-        options
+    if (!data.success) {
+      throw new Error(
+        "Failed to save order"
       );
+    }
 
-    razorpay.open();
-  } catch (error) {
-    console.error(error);
-
-    alert(
-      "Failed to start payment."
-    );
-  }
-};
-  const handlePlaceOrder = async () => {
-  if (
-    !name.trim() ||
-    !email.trim() ||
-    !phone.trim() ||
-    !city.trim() ||
-    !address.trim()
-  ) {
-    alert("Please fill all required fields.");
-    return;
-  }
-
-  if (cart.length === 0) {
-    alert("Your cart is empty.");
-    return;
-  }
-
-  const orderData = {
-    customer: {
-      name,
-      email,
-      phone,
-      city,
-      address,
-    },
-    paymentMethod,
-    items: cart,
-    total,
+    return data.orderId;
   };
 
-  const response = await fetch("/api/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(orderData),
-  });
+  const handleCODOrder =
+    async () => {
+      if (!validateForm()) {
+        return;
+      }
 
-  const data = await response.json();
+      try {
+        const orderId =
+          await saveOrder();
 
-if (data.success) {
-  const orderId = data.orderId;
+        clearCart();
 
-  clearCart();
+        router.push(
+          `/order-success?orderId=${orderId}`
+        );
+      } catch (error) {
+        console.error(error);
 
-  router.push(
-    `/order-success?orderId=${orderId}`
-  );
+        alert(
+          "Failed to place order."
+        );
+      }
+    };
 
-  } else {
-    alert("Failed to place order.");
-  }
-};
+  const handleOnlinePayment =
+    async () => {
+      if (!validateForm()) {
+        return;
+      }
+
+      try {
+        const response =
+          await fetch(
+            "/api/create-order",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                amount: total,
+              }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !data.success ||
+          !data.order
+        ) {
+          alert(
+            "Unable to create payment order."
+          );
+          return;
+        }
+
+        const options = {
+          key:
+            process.env
+              .NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+          amount:
+            data.order.amount,
+
+          currency:
+            data.order.currency,
+
+          order_id:
+            data.order.id,
+
+          name:
+            "Luxury Store",
+
+          description:
+            "Product Purchase",
+
+          prefill: {
+            name,
+            email,
+            contact:
+              phone,
+          },
+
+          theme: {
+            color:
+              "#EAB308",
+          },
+
+          handler:
+            async function () {
+              try {
+                const orderId =
+                  await saveOrder();
+
+                clearCart();
+
+                router.push(
+                  `/order-success?orderId=${orderId}`
+                );
+              } catch (
+                error
+              ) {
+                console.error(
+                  error
+                );
+
+                alert(
+                  "Payment succeeded but order saving failed."
+                );
+              }
+            },
+        };
+
+        const razorpay =
+          new window.Razorpay(
+            options
+          );
+
+        razorpay.open();
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "Failed to start payment."
+        );
+      }
+    };
+
+  const handleCheckout =
+    async () => {
+      if (
+        paymentMethod ===
+        "Cash on Delivery"
+      ) {
+        await handleCODOrder();
+      } else {
+        await handleOnlinePayment();
+      }
+    };
+
   return (
     <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+
       <Navbar />
 
       <main className="min-h-screen bg-black text-white pt-40 px-6">
@@ -166,7 +261,9 @@ if (data.success) {
               placeholder="Full Name"
               value={name}
               onChange={(e) =>
-                setName(e.target.value)
+                setName(
+                  e.target.value
+                )
               }
               className="bg-zinc-900 p-4 rounded-xl"
             />
@@ -176,7 +273,9 @@ if (data.success) {
               placeholder="Email Address"
               value={email}
               onChange={(e) =>
-                setEmail(e.target.value)
+                setEmail(
+                  e.target.value
+                )
               }
               className="bg-zinc-900 p-4 rounded-xl"
             />
@@ -186,7 +285,9 @@ if (data.success) {
               placeholder="Phone Number"
               value={phone}
               onChange={(e) =>
-                setPhone(e.target.value)
+                setPhone(
+                  e.target.value
+                )
               }
               className="bg-zinc-900 p-4 rounded-xl"
             />
@@ -196,7 +297,9 @@ if (data.success) {
               placeholder="City"
               value={city}
               onChange={(e) =>
-                setCity(e.target.value)
+                setCity(
+                  e.target.value
+                )
               }
               className="bg-zinc-900 p-4 rounded-xl"
             />
@@ -208,7 +311,9 @@ if (data.success) {
             placeholder="Street Address"
             value={address}
             onChange={(e) =>
-              setAddress(e.target.value)
+              setAddress(
+                e.target.value
+              )
             }
             className="bg-zinc-900 p-4 rounded-xl w-full mt-6"
           />
@@ -216,13 +321,23 @@ if (data.success) {
           <select
             value={paymentMethod}
             onChange={(e) =>
-              setPaymentMethod(e.target.value)
+              setPaymentMethod(
+                e.target.value
+              )
             }
             className="bg-zinc-900 p-4 rounded-xl w-full mt-6"
           >
-            <option>Cash on Delivery</option>
-            <option>Credit Card</option>
-            <option>UPI</option>
+            <option>
+              Cash on Delivery
+            </option>
+
+            <option>
+              Credit Card
+            </option>
+
+            <option>
+              UPI
+            </option>
           </select>
 
           <div className="mt-10 border-t border-zinc-800 pt-8">
@@ -232,12 +347,15 @@ if (data.success) {
             </h2>
 
             <p className="text-yellow-500 text-2xl">
-              ₹{total.toLocaleString()}
+              ₹
+              {total.toLocaleString()}
             </p>
 
             <button
               className="mt-6 bg-yellow-500 text-black px-8 py-4 rounded-xl font-semibold hover:bg-yellow-400 transition"
-              onClick={handlePlaceOrder}
+              onClick={
+                handleCheckout
+              }
             >
               Place Order
             </button>

@@ -25,19 +25,34 @@ export async function POST(req: Request) {
 
     const order = await req.json();
 
-const result = await client
-  .db("luxurystore")
-  .collection("orders")
-  .insertOne({
-    ...order,
-    status: "Pending",
-    createdAt: new Date(),
-  });
+    const result = await client
+      .db("luxurystore")
+      .collection("orders")
+      .insertOne({
+        ...order,
 
-return Response.json({
-  success: true,
-  orderId: result.insertedId,
-});
+        paymentStatus:
+          order.paymentStatus ??
+          (order.paymentMethod ===
+          "Cash on Delivery"
+            ? "Pending"
+            : "Paid"),
+
+        razorpayOrderId:
+          order.razorpayOrderId || null,
+
+        razorpayPaymentId:
+          order.razorpayPaymentId || null,
+
+        status: "Pending",
+
+        createdAt: new Date(),
+      });
+
+    return Response.json({
+      success: true,
+      orderId: result.insertedId,
+    });
   } catch (error) {
     return Response.json({
       success: false,

@@ -61,18 +61,27 @@ export default function CheckoutPage() {
   };
 
   const saveOrder = async () => {
-    const orderData = {
-      customer: {
-        name,
-        email,
-        phone,
-        city,
-        address,
-      },
-      paymentMethod,
-      items: cart,
-      total,
-    };
+const orderData = {
+  customer: {
+    name,
+    email,
+    phone,
+    city,
+    address,
+  },
+
+  paymentMethod,
+
+  paymentStatus:
+    paymentMethod ===
+    "Cash on Delivery"
+      ? "Pending"
+      : "Paid",
+
+  items: cart,
+
+  total,
+};
 
     const response = await fetch(
       "/api/orders",
@@ -188,12 +197,58 @@ export default function CheckoutPage() {
             color:
               "#EAB308",
           },
+handler:
+  async function (
+    response: any
+  ) {
 
-          handler:
-            async function () {
-              try {
-                const orderId =
-                  await saveOrder();
+    console.log(
+      "RAZORPAY RESPONSE:",
+      response
+    );
+
+    try {
+                const orderData = {
+  customer: {
+    name,
+    email,
+    phone,
+    city,
+    address,
+  },
+
+  paymentMethod,
+
+  paymentStatus: "Paid",
+
+  razorpayOrderId:
+    response.razorpay_order_id,
+
+  razorpayPaymentId:
+    response.razorpay_payment_id,
+
+  items: cart,
+
+  total,
+};
+
+const saveResponse =
+  await fetch("/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type":
+        "application/json",
+    },
+    body: JSON.stringify(
+      orderData
+    ),
+  });
+
+const saveData =
+  await saveResponse.json();
+
+const orderId =
+  saveData.orderId;
 
                 clearCart();
 

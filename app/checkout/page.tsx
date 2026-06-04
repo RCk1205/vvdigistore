@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
+import Script from "next/script";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -30,7 +31,70 @@ export default function CheckoutPage() {
         item.quantity,
     0
   );
+const handleRazorpayPayment = async () => {
+  try {
+    const response = await fetch(
+      "/api/create-order",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          amount: total,
+        }),
+      }
+    );
 
+    const order =
+      await response.json();
+
+    const options = {
+      key:
+        process.env
+          .NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+      amount: order.amount,
+
+      currency: order.currency,
+
+      name: "Luxury Store",
+
+      description:
+        "Order Payment",
+
+      order_id: order.id,
+
+      handler: function (
+        response: any
+      ) {
+        alert(
+          "Payment Successful"
+        );
+
+        console.log(response);
+      },
+
+      theme: {
+        color: "#EAB308",
+      },
+    };
+
+    const razorpay =
+      new (window as any).Razorpay(
+        options
+      );
+
+    razorpay.open();
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Failed to start payment."
+    );
+  }
+};
   const handlePlaceOrder = async () => {
   if (
     !name.trim() ||

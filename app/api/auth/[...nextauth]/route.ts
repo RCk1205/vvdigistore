@@ -34,11 +34,31 @@ const handler = NextAuth({
           return null;
         }
 
-        const validPassword =
-          await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
+     console.log(
+  "LOGIN EMAIL:",
+  credentials.email
+);
+
+console.log(
+  "ENTERED PASSWORD:",
+  credentials.password
+);
+
+console.log(
+  "DB HASH:",
+  user.password
+);
+
+const validPassword =
+  await bcrypt.compare(
+    credentials.password,
+    user.password
+  );
+
+console.log(
+  "PASSWORD MATCH:",
+  validPassword
+);
 
         if (!validPassword) {
           return null;

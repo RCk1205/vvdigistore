@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+} from "next/navigation";
+
+import { getSession } from "next-auth/react";
 import Navbar from "../../components/Navbar";
 
 export default function LoginPage() {
@@ -39,10 +43,19 @@ export default function LoginPage() {
     }
 
     alert("Login successful");
-
-    router.push("/admin");
+    const session =
+  await getSession();
+  
+  if (
+      (session?.user as any)
+          ?.role === "admin"
+        ) {
+  router.push("/admin");
+} else {
+    router.push("/products");
   }
-
+  }
+  
   return (
     <>
       <Navbar />

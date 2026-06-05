@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   ShoppingBag,
   Search,
   User,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 
 import { useCart } from "../context/CartContext";
@@ -21,17 +24,22 @@ export default function Navbar() {
   const { data: session } =
     useSession();
 
+  const [mobileMenuOpen, setMobileMenuOpen] =
+    useState(false);
+
   return (
     <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-black/40 border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+
+      <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
 
         <Link
           href="/"
-          className="font-serif text-4xl text-yellow-500 tracking-wide"
+          className="font-serif text-3xl md:text-4xl text-yellow-500 tracking-wide"
         >
-          LUXURY
+          VVDigiStore
         </Link>
 
+        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center gap-8 text-white">
 
           <li>
@@ -99,7 +107,7 @@ export default function Navbar() {
 
           {session ? (
             <>
-              <span className="hidden md:block text-sm text-yellow-500">
+              <span className="hidden lg:block text-sm text-yellow-500">
                 {session.user?.email}
               </span>
 
@@ -126,9 +134,123 @@ export default function Navbar() {
             </Link>
           )}
 
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden"
+            onClick={() =>
+              setMobileMenuOpen(
+                !mobileMenuOpen
+              )
+            }
+          >
+            {mobileMenuOpen ? (
+              <X size={26} />
+            ) : (
+              <Menu size={26} />
+            )}
+          </button>
+
         </div>
 
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-zinc-950 border-t border-white/10">
+
+          <div className="flex flex-col px-6 py-6 space-y-5 text-white">
+
+            <Link
+              href="/"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Home
+            </Link>
+
+            <Link
+              href="/about"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              About
+            </Link>
+
+            <Link
+              href="/products"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Products
+            </Link>
+
+            <Link
+              href="/gallery"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Gallery
+            </Link>
+
+            <Link
+              href="/blog"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Blog
+            </Link>
+
+            <Link
+              href="/contact"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Contact
+            </Link>
+
+            <Link
+              href="/cart"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Cart ({cart.length})
+            </Link>
+
+            {!session ? (
+              <Link
+                href="/login"
+                onClick={() =>
+                  setMobileMenuOpen(false)
+                }
+              >
+                Login
+              </Link>
+            ) : (
+              <button
+                onClick={() =>
+                  signOut({
+                    callbackUrl:
+                      "/login",
+                  })
+                }
+                className="text-left text-red-400"
+              >
+                Logout
+              </button>
+            )}
+
+          </div>
+
+        </div>
+      )}
+
     </nav>
   );
 }

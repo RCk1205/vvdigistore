@@ -93,14 +93,24 @@ export default function LoginPage() {
           />
 
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-yellow-500 text-black py-4 rounded-xl font-semibold"
-          >
-            {loading
-              ? "Logging in..."
-              : "Login"}
-          </button>
+  type="submit"
+  disabled={loading}
+  className="w-full bg-yellow-500 text-black py-4 rounded-xl font-semibold"
+>
+  {loading
+    ? "Logging in..."
+    : "Login"}
+</button>
+
+<p className="text-center mt-6 text-zinc-400">
+  Don't have an account?{" "}
+  <a
+    href="/signup"
+    className="text-yellow-500 hover:underline"
+  >
+    Create Account
+  </a>
+</p>
         </form>
 
       </main>

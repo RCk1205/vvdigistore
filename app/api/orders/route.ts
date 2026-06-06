@@ -23,10 +23,64 @@ export async function POST(req: Request) {
   try {
     const client = await clientPromise;
 
+    const db = client.db("luxurystore");
+
     const order = await req.json();
 
-    const result = await client
-      .db("luxurystore")
+    const productsCollection =
+      db.collection("products");
+
+    for (const item of order.items) {
+      const product =
+        await productsCollection.findOne({
+          id: item.id,
+        });
+
+      if (!product) {
+        return Response.json(
+          {
+            success: false,
+            error: `${item.name} not found`,
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+
+      const currentStock =
+        product.stock ?? 0;
+
+      if (
+        currentStock <
+        item.quantity
+      ) {
+        return Response.json(
+          {
+            success: false,
+            error: `Not enough stock for ${item.name}`,
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+    }
+
+    for (const item of order.items) {
+      await productsCollection.updateOne(
+        {
+          id: item.id,
+        },
+        {
+          $inc: {
+            stock: -item.quantity,
+          },
+        }
+      );
+    }
+
+    const result = await db
       .collection("orders")
       .insertOne({
         ...order,
@@ -39,10 +93,12 @@ export async function POST(req: Request) {
             : "Paid"),
 
         razorpayOrderId:
-          order.razorpayOrderId || null,
+          order.razorpayOrderId ||
+          null,
 
         razorpayPaymentId:
-          order.razorpayPaymentId || null,
+          order.razorpayPaymentId ||
+          null,
 
         status: "Pending",
 
@@ -54,9 +110,14 @@ export async function POST(req: Request) {
       orderId: result.insertedId,
     });
   } catch (error) {
-    return Response.json({
-      success: false,
-      error: String(error),
-    });
+    return Response.json(
+      {
+        success: false,
+        error: String(error),
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }

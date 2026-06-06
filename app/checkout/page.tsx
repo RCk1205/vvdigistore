@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
+import { useSession } from "next-auth/react";
 
 declare global {
   interface Window {
@@ -14,7 +15,7 @@ declare global {
 
 export default function CheckoutPage() {
   const router = useRouter();
-
+const { data: session } = useSession();
   const { cart, clearCart } = useCart();
 
   const [name, setName] = useState("");
@@ -25,6 +26,12 @@ export default function CheckoutPage() {
 
   const [paymentMethod, setPaymentMethod] =
     useState("Cash on Delivery");
+
+    useEffect(() => {
+  if (session?.user?.email) {
+    setEmail(session.user.email);
+  }
+}, [session]);
 
   const total = cart.reduce(
     (sum, item) =>
@@ -62,6 +69,9 @@ export default function CheckoutPage() {
 
   const saveOrder = async () => {
 const orderData = {
+  userEmail:
+    session?.user?.email || email,
+
   customer: {
     name,
     email,
@@ -209,6 +219,9 @@ handler:
 
     try {
                 const orderData = {
+  userEmail:
+    session?.user?.email || email,
+
   customer: {
     name,
     email,
@@ -216,6 +229,7 @@ handler:
     city,
     address,
   },
+
 
   paymentMethod,
 

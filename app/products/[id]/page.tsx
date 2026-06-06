@@ -20,6 +20,27 @@ async function getProduct(id: string) {
   return response.json();
 }
 
+function getStockStatus(stock: number) {
+  if (stock <= 0) {
+    return {
+      text: "Out Of Stock",
+      color: "text-red-500",
+    };
+  }
+
+  if (stock <= 10) {
+    return {
+      text: `Only ${stock} Left`,
+      color: "text-orange-400",
+    };
+  }
+
+  return {
+    text: "In Stock",
+    color: "text-green-500",
+  };
+}
+
 export default async function ProductPage({
   params,
 }: {
@@ -49,6 +70,11 @@ export default async function ProductPage({
     );
   }
 
+  const stockStatus =
+    getStockStatus(
+      product.stock ?? 0
+    );
+
   return (
     <>
       <Navbar />
@@ -69,7 +95,7 @@ export default async function ProductPage({
               {product.name}
             </h1>
 
-            <p className="text-yellow-500 text-3xl mb-8">
+            <p className="text-yellow-500 text-3xl mb-4">
               ₹{product.price}
             </p>
 
@@ -77,10 +103,22 @@ export default async function ProductPage({
               Category: {product.category}
             </p>
 
-            <p className="text-zinc-400 mb-10 leading-relaxed">
-              Premium craftsmanship, timeless design and
-              exceptional quality for discerning customers.
+            <p
+              className={`font-semibold mb-6 ${stockStatus.color}`}
+            >
+              {stockStatus.text}
             </p>
+
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-3">
+                Description
+              </h2>
+
+              <p className="text-zinc-400 leading-relaxed">
+                {product.description ||
+                  "No description available."}
+              </p>
+            </div>
 
             <AddToCartButton
               product={{
@@ -88,6 +126,8 @@ export default async function ProductPage({
                 name: product.name,
                 price: product.price,
                 image: product.image,
+                stock:
+                  product.stock ?? 0,
               }}
             />
 

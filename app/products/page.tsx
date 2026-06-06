@@ -126,12 +126,28 @@ export default function ProductsPage() {
                     </h3>
 
                     <p className="text-yellow-500 mb-2">
-                      ₹{product.price}
-                    </p>
+  ₹{product.price}
+</p>
 
-                    <p className="text-zinc-400 text-sm mb-4">
-                      {product.category}
-                    </p>
+<p className="text-zinc-400 text-sm">
+  {product.category}
+</p>
+
+<p
+  className={`text-sm font-semibold mt-2 mb-4 ${
+    (product.stock ?? 0) <= 0
+      ? "text-red-500"
+      : (product.stock ?? 0) <= 10
+      ? "text-orange-400"
+      : "text-green-500"
+  }`}
+>
+  {(product.stock ?? 0) <= 0
+    ? "Out Of Stock"
+    : (product.stock ?? 0) <= 10
+    ? `Only ${product.stock} Left`
+    : "In Stock"}
+</p>
 
                     <Link
                       href={`/products/${product.id}`}

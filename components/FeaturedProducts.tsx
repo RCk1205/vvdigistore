@@ -69,12 +69,28 @@ export default function FeaturedProducts() {
                   </h3>
 
                   <p className="text-yellow-500 mt-2">
-                    ₹{product.price}
-                  </p>
+  ₹{product.price}
+</p>
 
-                  <span className="inline-block mt-4 bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold">
-                    View Details
-                  </span>
+<p
+  className={`mt-2 text-sm font-semibold ${
+    (product.stock ?? 0) <= 0
+      ? "text-red-500"
+      : (product.stock ?? 0) <= 10
+      ? "text-orange-400"
+      : "text-green-500"
+  }`}
+>
+  {(product.stock ?? 0) <= 0
+    ? "Out Of Stock"
+    : (product.stock ?? 0) <= 10
+    ? `Only ${product.stock} Left`
+    : "In Stock"}
+</p>
+
+<span className="inline-block mt-4 bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold">
+  View Details
+</span>
                 </div>
               </motion.div>
             </Link>

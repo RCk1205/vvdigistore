@@ -1,9 +1,14 @@
-import NextAuth from "next-auth";
+import NextAuth, {
+  NextAuthOptions,
+} from "next-auth";
+
 import CredentialsProvider from "next-auth/providers/credentials";
+
 import clientPromise from "../../../../lib/mongodb";
+
 import bcrypt from "bcrypt";
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -21,44 +26,26 @@ const handler = NextAuth({
           return null;
         }
 
-        const client = await clientPromise;
+        const client =
+          await clientPromise;
 
         const user = await client
           .db("luxurystore")
           .collection("users")
           .findOne({
-            email: credentials.email,
+            email:
+              credentials.email,
           });
 
         if (!user) {
           return null;
         }
 
-     console.log(
-  "LOGIN EMAIL:",
-  credentials.email
-);
-
-console.log(
-  "ENTERED PASSWORD:",
-  credentials.password
-);
-
-console.log(
-  "DB HASH:",
-  user.password
-);
-
-const validPassword =
-  await bcrypt.compare(
-    credentials.password,
-    user.password
-  );
-
-console.log(
-  "PASSWORD MATCH:",
-  validPassword
-);
+        const validPassword =
+          await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
 
         if (!validPassword) {
           return null;
@@ -75,7 +62,10 @@ console.log(
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({
+      token,
+      user,
+    }) {
       if (user) {
         token.role =
           (user as any).role;
@@ -101,6 +91,12 @@ console.log(
 
   secret:
     process.env.NEXTAUTH_SECRET,
-});
+};
 
-export { handler as GET, handler as POST };
+const handler =
+  NextAuth(authOptions);
+
+export {
+  handler as GET,
+  handler as POST,
+};

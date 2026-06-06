@@ -10,11 +10,23 @@ export async function GET() {
       .find({})
       .toArray();
 
-    return Response.json(products);
+    const formattedProducts = products.map((product) => ({
+      ...product,
+      description: product.description ?? "",
+      stock: product.stock ?? 0,
+    }));
+
+    return Response.json(formattedProducts);
   } catch (error) {
-    return Response.json({
-      error: String(error),
-    });
+    return Response.json(
+      {
+        success: false,
+        error: String(error),
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 
@@ -27,38 +39,35 @@ export async function POST(req: Request) {
     await client
       .db("luxurystore")
       .collection("products")
-      .insertOne(product);
+      .insertOne({
+        id: product.id,
+        name: product.name,
+        price: Number(product.price),
+        category: product.category,
+        image: product.image,
+
+        description:
+          product.description ?? "",
+
+        stock:
+          Number(product.stock) ?? 0,
+
+        createdAt: new Date(),
+      });
 
     return Response.json({
       success: true,
     });
   } catch (error) {
-    return Response.json({
-      success: false,
-      error: String(error),
-    });
-  }
-}
-
-export async function DELETE(req: Request) {
-  try {
-    const client = await clientPromise;
-
-    const { id } = await req.json();
-
-    await client
-      .db("luxurystore")
-      .collection("products")
-      .deleteOne({ id });
-
-    return Response.json({
-      success: true,
-    });
-  } catch (error) {
-    return Response.json({
-      success: false,
-      error: String(error),
-    });
+    return Response.json(
+      {
+        success: false,
+        error: String(error),
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 
@@ -72,13 +81,23 @@ export async function PUT(req: Request) {
       .db("luxurystore")
       .collection("products")
       .updateOne(
-        { id: product.id },
+        {
+          id: product.id,
+        },
         {
           $set: {
             name: product.name,
-            price: product.price,
+            price: Number(product.price),
             category: product.category,
             image: product.image,
+
+            description:
+              product.description ?? "",
+
+            stock:
+              Number(product.stock) ?? 0,
+
+            updatedAt: new Date(),
           },
         }
       );
@@ -87,9 +106,43 @@ export async function PUT(req: Request) {
       success: true,
     });
   } catch (error) {
+    return Response.json(
+      {
+        success: false,
+        error: String(error),
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const client = await clientPromise;
+
+    const { id } = await req.json();
+
+    await client
+      .db("luxurystore")
+      .collection("products")
+      .deleteOne({
+        id,
+      });
+
     return Response.json({
-      success: false,
-      error: String(error),
+      success: true,
     });
+  } catch (error) {
+    return Response.json(
+      {
+        success: false,
+        error: String(error),
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }

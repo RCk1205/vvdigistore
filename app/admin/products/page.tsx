@@ -12,6 +12,12 @@ export default function ProductsAdminPage() {
   const [category, setCategory] =
     useState("Watches");
 
+  const [description, setDescription] =
+    useState("");
+
+  const [stock, setStock] =
+    useState("");
+
   const [image, setImage] =
     useState("");
 
@@ -60,8 +66,23 @@ export default function ProductsAdminPage() {
     setEditingId(product.id);
 
     setName(product.name);
-    setPrice(product.price.toString());
+
+    setPrice(
+      product.price.toString()
+    );
+
     setCategory(product.category);
+
+    setDescription(
+      product.description || ""
+    );
+
+    setStock(
+      String(
+        product.stock ?? 0
+      )
+    );
+
     setImage(product.image);
   };
 
@@ -69,7 +90,9 @@ export default function ProductsAdminPage() {
     if (
       !name ||
       !price ||
-      !image
+      !image ||
+      !description ||
+      !stock
     ) {
       alert(
         "Please fill all fields"
@@ -87,6 +110,10 @@ export default function ProductsAdminPage() {
       price: Number(price),
 
       category,
+
+      description,
+
+      stock: Number(stock),
 
       image,
     };
@@ -138,6 +165,11 @@ export default function ProductsAdminPage() {
     setCategory(
       "Watches"
     );
+
+    setDescription("");
+
+    setStock("");
+
     setImage("");
 
     loadProducts();
@@ -199,21 +231,49 @@ export default function ProductsAdminPage() {
                 <option>
                   Watches
                 </option>
+
                 <option>
                   Bags
                 </option>
+
                 <option>
                   Perfumes
                 </option>
+
                 <option>
                   Accessories
                 </option>
+
                 <option>
                   Jewelry
                 </option>
               </select>
 
-              <div className="space-y-2">
+              <input
+                type="number"
+                placeholder="Stock Quantity"
+                value={stock}
+                onChange={(e) =>
+                  setStock(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              />
+
+              <textarea
+                placeholder="Product Description"
+                value={description}
+                onChange={(e) =>
+                  setDescription(
+                    e.target.value
+                  )
+                }
+                rows={4}
+                className="bg-black p-4 rounded-xl md:col-span-2"
+              />
+
+              <div className="space-y-2 md:col-span-2">
 
                 <ImageUpload
                   setImage={
@@ -280,6 +340,14 @@ export default function ProductsAdminPage() {
                       <p className="text-zinc-400">
                         {
                           product.category
+                        }
+                      </p>
+
+                      <p className="text-zinc-500 text-sm">
+                        Stock:
+                        {" "}
+                        {
+                          product.stock ?? 0
                         }
                       </p>
 

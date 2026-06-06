@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Navbar from "../../components/Navbar";
 
 export default function SignupPage() {
@@ -125,6 +126,16 @@ export default function SignupPage() {
                 ? "Creating Account..."
                 : "Create Account"}
             </button>
+
+            <p className="text-center text-zinc-400">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-yellow-500 hover:underline"
+              >
+                Login
+              </Link>
+            </p>
 
           </form>
 

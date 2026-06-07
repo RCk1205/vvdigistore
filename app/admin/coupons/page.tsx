@@ -1,0 +1,345 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Navbar from "../../../components/Navbar";
+
+export default function CouponsPage() {
+  const [coupons, setCoupons] = useState<any[]>([]);
+
+  const [code, setCode] = useState("");
+  const [type, setType] =
+    useState("percentage");
+
+  const [value, setValue] =
+    useState("");
+
+  const [page, setPage] =
+    useState("home");
+
+  const [position, setPosition] =
+    useState("hero");
+
+  const [active, setActive] =
+    useState(true);
+
+  const loadCoupons = async () => {
+    const response =
+      await fetch("/api/coupons");
+
+    const data =
+      await response.json();
+
+    setCoupons(data);
+  };
+
+  useEffect(() => {
+    loadCoupons();
+  }, []);
+
+  const createCoupon =
+    async () => {
+      if (
+        !code ||
+        !value
+      ) {
+        alert(
+          "Fill all fields"
+        );
+        return;
+      }
+
+      const coupon = {
+        code:
+          code.toUpperCase(),
+
+        type,
+
+        value:
+          Number(value),
+
+        active,
+
+        display: {
+          page,
+          position,
+        },
+      };
+
+      const response =
+        await fetch(
+          "/api/coupons",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify(
+              coupon
+            ),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (data.success) {
+        alert(
+          "Coupon Created"
+        );
+
+        setCode("");
+        setValue("");
+
+        loadCoupons();
+      }
+    };
+
+  const deleteCoupon =
+    async (
+      couponCode: string
+    ) => {
+      const confirmed =
+        window.confirm(
+          "Delete coupon?"
+        );
+
+      if (!confirmed)
+        return;
+
+      await fetch(
+        "/api/coupons",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            code:
+              couponCode,
+          }),
+        }
+      );
+
+      loadCoupons();
+    };
+
+  return (
+    <>
+      <Navbar />
+
+      <main className="min-h-screen bg-black text-white pt-40 px-6">
+
+        <div className="max-w-7xl mx-auto">
+
+          <h1 className="font-serif text-6xl mb-10">
+            Coupons
+          </h1>
+
+          <div className="bg-zinc-900 rounded-3xl p-8 mb-10">
+
+            <h2 className="text-3xl mb-6">
+              Create Coupon
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-4">
+
+              <input
+                type="text"
+                placeholder="Coupon Code"
+                value={code}
+                onChange={(e) =>
+                  setCode(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              />
+
+              <input
+                type="number"
+                placeholder="Discount Value"
+                value={value}
+                onChange={(e) =>
+                  setValue(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              />
+
+              <select
+                value={type}
+                onChange={(e) =>
+                  setType(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              >
+                <option value="percentage">
+                  Percentage
+                </option>
+
+                <option value="fixed">
+                  Fixed Amount
+                </option>
+              </select>
+
+              <select
+                value={page}
+                onChange={(e) =>
+                  setPage(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              >
+                <option value="home">
+                  Home
+                </option>
+
+                <option value="products">
+                  Products
+                </option>
+
+                <option value="product">
+                  Product Details
+                </option>
+
+                <option value="cart">
+                  Cart
+                </option>
+
+                <option value="checkout">
+                  Checkout
+                </option>
+              </select>
+
+              <select
+                value={position}
+                onChange={(e) =>
+                  setPosition(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              >
+                <option value="hero">
+                  Hero
+                </option>
+
+                <option value="top">
+                  Top
+                </option>
+
+                <option value="middle">
+                  Middle
+                </option>
+
+                <option value="bottom">
+                  Bottom
+                </option>
+              </select>
+
+              <label className="flex items-center gap-3 bg-black p-4 rounded-xl">
+                <input
+                  type="checkbox"
+                  checked={active}
+                  onChange={(e) =>
+                    setActive(
+                      e.target.checked
+                    )
+                  }
+                />
+
+                Active
+              </label>
+
+            </div>
+
+            <button
+              onClick={
+                createCoupon
+              }
+              className="mt-6 bg-yellow-500 text-black px-6 py-3 rounded-xl font-semibold"
+            >
+              Create Coupon
+            </button>
+
+          </div>
+
+          <div className="bg-zinc-900 rounded-3xl p-8">
+
+            <h2 className="text-3xl mb-6">
+              Existing Coupons
+            </h2>
+
+            <div className="space-y-4">
+
+              {coupons.map(
+                (coupon) => (
+                  <div
+                    key={
+                      coupon._id
+                    }
+                    className="border-b border-zinc-800 pb-4 flex justify-between items-center"
+                  >
+                    <div>
+
+                      <p className="font-semibold">
+                        {
+                          coupon.code
+                        }
+                      </p>
+
+                      <p className="text-zinc-400">
+                        {
+                          coupon.type
+                        }
+                        {" - "}
+                        {
+                          coupon.value
+                        }
+                      </p>
+
+                      <p className="text-zinc-500 text-sm">
+                        {
+                          coupon.display
+                            ?.page
+                        }
+                        {" / "}
+                        {
+                          coupon.display
+                            ?.position
+                        }
+                      </p>
+
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        deleteCoupon(
+                          coupon.code
+                        )
+                      }
+                      className="bg-red-600 px-4 py-2 rounded-lg"
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+                )
+              )}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+    </>
+  );
+}

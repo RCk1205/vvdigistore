@@ -9,9 +9,11 @@ import {
   LogOut,
   Menu,
   X,
+  Heart,
 } from "lucide-react";
 
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
 import {
   useSession,
@@ -20,6 +22,9 @@ import {
 
 export default function Navbar() {
   const { cart } = useCart();
+
+  const { wishlist } =
+    useWishlist();
 
   const { data: session } =
     useSession();
@@ -39,7 +44,6 @@ export default function Navbar() {
           VVDigiStore
         </Link>
 
-        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center gap-8 text-white">
 
           <li>
@@ -90,6 +94,22 @@ export default function Navbar() {
           </Link>
 
           <Link
+            href="/wishlist"
+            className="relative"
+          >
+            <Heart
+              size={20}
+              className="cursor-pointer hover:text-yellow-500"
+            />
+
+            {wishlist.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {wishlist.length}
+              </span>
+            )}
+          </Link>
+
+          <Link
             href="/cart"
             className="relative"
           >
@@ -110,6 +130,13 @@ export default function Navbar() {
               <span className="hidden lg:block text-sm text-yellow-500">
                 {session.user?.email}
               </span>
+
+              <Link
+                href="/accounts"
+                className="text-sm hover:text-yellow-500"
+              >
+                Account
+              </Link>
 
               <button
                 onClick={() =>
@@ -134,7 +161,6 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden"
             onClick={() =>
@@ -154,7 +180,6 @@ export default function Navbar() {
 
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-zinc-950 border-t border-white/10">
 
@@ -215,6 +240,15 @@ export default function Navbar() {
             </Link>
 
             <Link
+              href="/wishlist"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+            >
+              Wishlist ({wishlist.length})
+            </Link>
+
+            <Link
               href="/cart"
               onClick={() =>
                 setMobileMenuOpen(false)
@@ -222,6 +256,17 @@ export default function Navbar() {
             >
               Cart ({cart.length})
             </Link>
+
+            {session && (
+              <Link
+                href="/accounts"
+                onClick={() =>
+                  setMobileMenuOpen(false)
+                }
+              >
+                Account
+              </Link>
+            )}
 
             {!session ? (
               <Link

@@ -1,6 +1,6 @@
 import Navbar from "../../../components/Navbar";
 import AddToCartButton from "../../../components/AddToCartButton";
-
+import AddToWishlistButton from "../../../components/AddToWishlistButton";
 async function getProduct(id: string) {
   const baseUrl =
     process.env.NEXTAUTH_URL ||
@@ -120,16 +120,28 @@ export default async function ProductPage({
               </p>
             </div>
 
-            <AddToCartButton
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-                stock:
-                  product.stock ?? 0,
-              }}
-            />
+           <div className="flex gap-4 flex-wrap">
+
+  <AddToCartButton
+    product={{
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      stock: product.stock ?? 0,
+    }}
+  />
+
+  <AddToWishlistButton
+    product={{
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    }}
+  />
+
+</div>
 
           </div>
 

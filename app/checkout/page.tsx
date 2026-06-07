@@ -26,7 +26,11 @@ const { data: session } = useSession();
 
   const [paymentMethod, setPaymentMethod] =
     useState("Cash on Delivery");
+const [coupon, setCoupon] =
+  useState("");
 
+const [discount, setDiscount] =
+  useState(0);
     useEffect(() => {
   if (session?.user?.email) {
     setEmail(session.user.email);
@@ -44,7 +48,43 @@ const { data: session } = useSession();
         item.quantity,
     0
   );
+  const finalTotal =
+  Math.max(
+    total - discount,
+    0
+  );
+const applyCoupon = () => {
+  const code =
+    coupon.trim().toUpperCase();
 
+  if (
+    code === "WELCOME10"
+  ) {
+    setDiscount(
+      Math.round(
+        total * 0.1
+      )
+    );
+
+    alert(
+      "WELCOME10 Applied"
+    );
+  } else if (
+    code === "FLAT500"
+  ) {
+    setDiscount(500);
+
+    alert(
+      "FLAT500 Applied"
+    );
+  } else {
+    setDiscount(0);
+
+    alert(
+      "Invalid Coupon"
+    );
+  }
+};
   const validateForm = () => {
     if (
       !name.trim() ||
@@ -90,7 +130,7 @@ const orderData = {
 
   items: cart,
 
-  total,
+  total: finalTotal,
 };
 
     const response = await fetch(
@@ -158,7 +198,7 @@ const orderData = {
                   "application/json",
               },
               body: JSON.stringify({
-                amount: total,
+               amount: finalTotal,
               }),
             }
           );
@@ -243,7 +283,7 @@ handler:
 
   items: cart,
 
-  total,
+total: finalTotal,
 };
 
 const saveResponse =
@@ -410,15 +450,62 @@ const orderId =
           </select>
 
           <div className="mt-10 border-t border-zinc-800 pt-8">
+<div className="mb-8">
 
+  <h2 className="text-2xl mb-4">
+    Coupon Code
+  </h2>
+
+  <div className="flex gap-3">
+
+    <input
+      type="text"
+      placeholder="Enter Coupon"
+      value={coupon}
+      onChange={(e) =>
+        setCoupon(
+          e.target.value
+        )
+      }
+      className="flex-1 bg-zinc-900 p-4 rounded-xl"
+    />
+
+    <button
+      onClick={
+        applyCoupon
+      }
+      className="bg-yellow-500 text-black px-6 rounded-xl"
+    >
+      Apply
+    </button>
+
+  </div>
+
+</div>
             <h2 className="text-3xl mb-4">
               Order Total
             </h2>
 
-            <p className="text-yellow-500 text-2xl">
-              ₹
-              {total.toLocaleString()}
-            </p>
+            <div>
+
+  <p className="text-zinc-400">
+    Original Total:
+    ₹{total.toLocaleString()}
+  </p>
+
+  {discount > 0 && (
+    <p className="text-green-500">
+      Discount:
+      ₹{discount}
+    </p>
+  )}
+
+  <p className="text-yellow-500 text-2xl mt-2">
+    Final Total:
+    ₹{finalTotal.toLocaleString()}
+  </p>
+
+</div>
 
             <button
               className="mt-6 bg-yellow-500 text-black px-8 py-4 rounded-xl font-semibold hover:bg-yellow-400 transition"

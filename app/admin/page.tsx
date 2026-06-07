@@ -16,7 +16,7 @@ export default function AdminPage() {
             Admin Dashboard
           </h1>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 
             <Link
               href="/admin/products"
@@ -27,7 +27,7 @@ export default function AdminPage() {
               </h2>
 
               <p className="text-zinc-400">
-                Add, edit and delete products.
+                Add, edit and manage products.
               </p>
             </Link>
 
@@ -44,10 +44,27 @@ export default function AdminPage() {
               </p>
             </Link>
 
+            <Link
+              href="/admin/coupons"
+              className="bg-zinc-900 p-10 rounded-3xl hover:bg-zinc-800 transition"
+            >
+              <h2 className="text-3xl mb-4">
+                Coupons
+              </h2>
+
+              <p className="text-zinc-400">
+                Create, manage and display coupons.
+              </p>
+            </Link>
+
           </div>
 
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() =>
+              signOut({
+                callbackUrl: "/",
+              })
+            }
             className="mt-12 bg-red-600 px-6 py-3 rounded-xl"
           >
             Logout

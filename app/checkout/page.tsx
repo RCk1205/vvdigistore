@@ -31,6 +31,9 @@ const [coupon, setCoupon] =
 
 const [discount, setDiscount] =
   useState(0);
+  const [couponApplied,
+  setCouponApplied] =
+  useState(false);
     useEffect(() => {
   if (session?.user?.email) {
     setEmail(session.user.email);
@@ -53,35 +56,56 @@ const [discount, setDiscount] =
     total - discount,
     0
   );
-const applyCoupon = () => {
-  const code =
-    coupon.trim().toUpperCase();
+const applyCoupon = async () => {
+  try {
+    const response =
+      await fetch(
+        "/api/coupons/validate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            code: coupon,
+            total,
+          }),
+        }
+      );
 
-  if (
-    code === "WELCOME10"
-  ) {
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      setDiscount(0);
+
+      alert(
+        data.message ||
+          "Coupon Invalid"
+      );
+
+      return;
+    }
+
     setDiscount(
-      Math.round(
-        total * 0.1
-      )
+  data.discount
+);
+
+setCouponApplied(
+  true
+);
+
+alert(
+  `Coupon Applied. Discount ₹${data.discount}`
+);
+  } catch (error) {
+    console.error(
+      error
     );
 
     alert(
-      "WELCOME10 Applied"
-    );
-  } else if (
-    code === "FLAT500"
-  ) {
-    setDiscount(500);
-
-    alert(
-      "FLAT500 Applied"
-    );
-  } else {
-    setDiscount(0);
-
-    alert(
-      "Invalid Coupon"
+      "Failed to validate coupon"
     );
   }
 };
@@ -111,6 +135,12 @@ const applyCoupon = () => {
 const orderData = {
   userEmail:
     session?.user?.email || email,
+    couponCode:
+  discount > 0
+    ? coupon
+        .trim()
+        .toUpperCase()
+    : null,
 
   customer: {
     name,
@@ -197,9 +227,12 @@ const orderData = {
                 "Content-Type":
                   "application/json",
               },
-              body: JSON.stringify({
-               amount: finalTotal,
-              }),
+             body: JSON.stringify({
+  code: coupon,
+  total,
+  userEmail:
+    session?.user?.email,
+}),
             }
           );
 
@@ -261,6 +294,12 @@ handler:
                 const orderData = {
   userEmail:
     session?.user?.email || email,
+    couponCode:
+  discount > 0
+    ? coupon
+        .trim()
+        .toUpperCase()
+    : null,
 
   customer: {
     name,
@@ -471,13 +510,18 @@ const orderId =
     />
 
     <button
-      onClick={
-        applyCoupon
-      }
-      className="bg-yellow-500 text-black px-6 rounded-xl"
-    >
-      Apply
-    </button>
+  disabled={
+    couponApplied
+  }
+  onClick={
+    applyCoupon
+  }
+  className="bg-yellow-500 text-black px-6 rounded-xl disabled:opacity-50"
+>
+  {couponApplied
+    ? "Applied"
+    : "Apply"}
+</button>
 
   </div>
 

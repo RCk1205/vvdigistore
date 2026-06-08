@@ -23,9 +23,19 @@ export async function POST(req: Request) {
   try {
     const client = await clientPromise;
 
-    const db = client.db("luxurystore");
+    
 
     const order = await req.json();
+
+const db =
+  client.db(
+    "luxurystore"
+  );
+
+const couponUsageCollection =
+  db.collection(
+    "couponUsage"
+  );
 
     const productsCollection =
       db.collection("products");
@@ -104,7 +114,41 @@ export async function POST(req: Request) {
 
         createdAt: new Date(),
       });
+if (
+  order.couponCode &&
+  order.userEmail
+) {
+  await couponUsageCollection.insertOne(
+    {
+      couponCode:
+        order.couponCode
+          .toUpperCase(),
 
+      userEmail:
+        order.userEmail,
+
+      usedAt:
+        new Date(),
+    }
+  );
+
+  await db
+    .collection(
+      "coupons"
+    )
+    .updateOne(
+      {
+        code:
+          order.couponCode
+            .toUpperCase(),
+      },
+      {
+        $inc: {
+          usedCount: 1,
+        },
+      }
+    );
+}
     return Response.json({
       success: true,
       orderId: result.insertedId,

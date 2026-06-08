@@ -22,6 +22,15 @@ export default function CouponsPage() {
   const [active, setActive] =
     useState(true);
 
+  const [expiryDate, setExpiryDate] =
+    useState("");
+
+  const [usageLimit, setUsageLimit] =
+    useState("");
+
+  const [minimumOrder, setMinimumOrder] =
+    useState("");
+
   const loadCoupons = async () => {
     const response =
       await fetch("/api/coupons");
@@ -43,7 +52,7 @@ export default function CouponsPage() {
         !value
       ) {
         alert(
-          "Fill all fields"
+          "Fill all required fields"
         );
         return;
       }
@@ -58,6 +67,25 @@ export default function CouponsPage() {
           Number(value),
 
         active,
+
+        expiryDate:
+          expiryDate || null,
+
+        usageLimit:
+          usageLimit
+            ? Number(
+                usageLimit
+              )
+            : null,
+
+        usedCount: 0,
+
+        minimumOrder:
+          minimumOrder
+            ? Number(
+                minimumOrder
+              )
+            : 0,
 
         display: {
           page,
@@ -90,6 +118,9 @@ export default function CouponsPage() {
 
         setCode("");
         setValue("");
+        setExpiryDate("");
+        setUsageLimit("");
+        setMinimumOrder("");
 
         loadCoupons();
       }
@@ -186,6 +217,41 @@ export default function CouponsPage() {
                   Fixed Amount
                 </option>
               </select>
+
+              <input
+                type="number"
+                placeholder="Minimum Order Value"
+                value={minimumOrder}
+                onChange={(e) =>
+                  setMinimumOrder(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              />
+
+              <input
+                type="number"
+                placeholder="Usage Limit"
+                value={usageLimit}
+                onChange={(e) =>
+                  setUsageLimit(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              />
+
+              <input
+                type="date"
+                value={expiryDate}
+                onChange={(e) =>
+                  setExpiryDate(
+                    e.target.value
+                  )
+                }
+                className="bg-black p-4 rounded-xl"
+              />
 
               <select
                 value={page}
@@ -301,6 +367,31 @@ export default function CouponsPage() {
                         {" - "}
                         {
                           coupon.value
+                        }
+                      </p>
+
+                      <p className="text-zinc-500 text-sm">
+                        Min Order: ₹
+                        {
+                          coupon.minimumOrder
+                        }
+                      </p>
+
+                      <p className="text-zinc-500 text-sm">
+                        Usage Limit:
+                        {" "}
+                        {
+                          coupon.usageLimit ??
+                          "Unlimited"
+                        }
+                      </p>
+
+                      <p className="text-zinc-500 text-sm">
+                        Expiry:
+                        {" "}
+                        {
+                          coupon.expiryDate ??
+                          "No Expiry"
                         }
                       </p>
 

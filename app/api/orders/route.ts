@@ -1,21 +1,53 @@
 import clientPromise from "../../../lib/mongodb";
-
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 export async function GET() {
   try {
-    const client = await clientPromise;
+    const session =
+      await getServerSession(
+        authOptions
+      );
 
-    const orders = await client
-      .db("luxurystore")
-      .collection("orders")
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
+    if (
+      !session?.user ||
+      (session.user as any)
+        ?.role !== "admin"
+    ) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Unauthorized",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
 
-    return Response.json(orders);
+    const client =
+      await clientPromise;
+
+    const orders =
+      await client
+        .db("luxurystore")
+        .collection("orders")
+        .find({})
+        .sort({
+          createdAt: -1,
+        })
+        .toArray();
+
+    return Response.json(
+      orders
+    );
   } catch (error) {
-    return Response.json({
-      error: String(error),
-    });
+    return Response.json(
+      {
+        error:
+          String(error),
+      }
+    );
   }
 }
 
@@ -106,7 +138,36 @@ const couponUsageCollection =
         );
       }
     }
+let calculatedTotal = 0;
 
+for (const item of order.items) {
+  const product =
+    await productsCollection.findOne({
+      id: item.id,
+    });
+
+  if (product) {
+    calculatedTotal +=
+      product.price *
+      item.quantity;
+  }
+}
+
+if (
+  order.total >
+  calculatedTotal
+) {
+  return Response.json(
+    {
+      success: false,
+      error:
+        "Invalid order total",
+    },
+    {
+      status: 400,
+    }
+  );
+}
     for (const item of order.items) {
       await productsCollection.updateOne(
         {

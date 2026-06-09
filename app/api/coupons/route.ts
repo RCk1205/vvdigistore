@@ -1,7 +1,39 @@
 import clientPromise from "../../../lib/mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+async function verifyAdmin() {
+  const session =
+    await getServerSession(
+      authOptions
+    );
 
+  if (
+    !session?.user ||
+    (session.user as any)
+      ?.role !== "admin"
+  ) {
+    return false;
+  }
+
+  return true;
+}
 export async function GET() {
   try {
+    const isAdmin =
+  await verifyAdmin();
+
+if (!isAdmin) {
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Unauthorized",
+    },
+    {
+      status: 403,
+    }
+  );
+}
     const client = await clientPromise;
 
     const coupons = await client
@@ -26,6 +58,21 @@ export async function POST(
   req: Request
 ) {
   try {
+    const isAdmin =
+  await verifyAdmin();
+
+if (!isAdmin) {
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Unauthorized",
+    },
+    {
+      status: 403,
+    }
+  );
+}
     const client = await clientPromise;
 
     const coupon =
@@ -55,6 +102,21 @@ export async function PUT(
   req: Request
 ) {
   try {
+    const isAdmin =
+  await verifyAdmin();
+
+if (!isAdmin) {
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Unauthorized",
+    },
+    {
+      status: 403,
+    }
+  );
+}
     const client = await clientPromise;
 
     const {
@@ -92,6 +154,21 @@ export async function DELETE(
   req: Request
 ) {
   try {
+    const isAdmin =
+  await verifyAdmin();
+
+if (!isAdmin) {
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Unauthorized",
+    },
+    {
+      status: 403,
+    }
+  );
+}
     const client = await clientPromise;
 
     const { code } =

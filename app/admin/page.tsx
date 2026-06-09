@@ -25,61 +25,64 @@ const [subscribers, setSubscribers] =
     loadData();
   }, []);
 
-  const loadData =
-    async () => {
-      try {
-        const [
-  productsRes,
-  ordersRes,
-  couponsRes,
-  usersRes,
-  subscribersRes,
-] = await Promise.all([
-  fetch("/api/products"),
-  fetch("/api/orders"),
-  fetch("/api/coupons"),
-  fetch("/api/signup"),
-  fetch("/api/newsletter"),
-]);
+ const loadData = async () => {
+  try {
+    const productsRes =
+      await fetch("/api/products");
 
-const productsData =
-  await productsRes.json();
+    const ordersRes =
+      await fetch("/api/orders");
 
-const ordersData =
-  await ordersRes.json();
+    const couponsRes =
+      await fetch("/api/coupons");
 
-const couponsData =
-  await couponsRes.json();
+    const usersRes =
+      await fetch("/api/signup");
 
-const usersData =
-  await usersRes.json();
+    const subscribersRes =
+      await fetch("/api/newsletter");
 
-const subscribersData =
-  await subscribersRes.json();
+    const productsData =
+      productsRes.ok
+        ? await productsRes.json()
+        : [];
 
-       setProducts(
-  productsData || []
-);
+    const ordersData =
+      ordersRes.ok
+        ? await ordersRes.json()
+        : [];
 
-setOrders(
-  ordersData || []
-);
+    const couponsData =
+      couponsRes.ok
+        ? await couponsRes.json()
+        : [];
 
-setCoupons(
-  couponsData || []
-);
+    const usersData =
+      usersRes.ok
+        ? await usersRes.json()
+        : [];
 
-setUsers(
-  usersData || []
-);
+    const subscribersData =
+      subscribersRes.ok
+        ? await subscribersRes.json()
+        : [];
 
-setSubscribers(
-  subscribersData || []
-);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    setProducts(productsData || []);
+    setOrders(ordersData || []);
+    setCoupons(couponsData || []);
+    setUsers(usersData || []);
+    setSubscribers(
+      subscribersData || []
+    );
+  } catch (error) {
+    console.error(
+      "Dashboard Load Error:",
+      error
+    );
+  }
+};
+
+
 
   const totalRevenue =
     orders.reduce(
@@ -100,6 +103,40 @@ setSubscribers(
         (product.stock ??
           0) <= 10
     ).length;
+    const salesMap: Record<
+  string,
+  number
+> = {};
+
+orders.forEach(
+  (order) => {
+    order.items?.forEach(
+      (item: any) => {
+        salesMap[item.name] =
+          (salesMap[
+            item.name
+          ] || 0) +
+          item.quantity;
+      }
+    );
+  }
+);
+
+const bestSellingProducts =
+  Object.entries(
+    salesMap
+  )
+    .sort(
+      (a, b) =>
+        b[1] - a[1]
+    )
+    .slice(0, 5);
+
+const topProduct =
+  bestSellingProducts.length > 0
+    ? bestSellingProducts[0]
+    : null;
+
 const conversionRate =
   users.length === 0
     ? 0
@@ -234,7 +271,75 @@ const conversionRate =
             </Link>
 
           </div>
+<div className="bg-zinc-900 rounded-3xl p-8 mb-12">
 
+  <h2 className="text-3xl mb-6">
+    Best Selling Products
+  </h2>
+
+  {bestSellingProducts.length === 0 ? (
+    <p className="text-zinc-400">
+      No sales data available.
+    </p>
+  ) : (
+    <>
+      <div className="bg-black rounded-2xl p-5 mb-6">
+
+        <p className="text-zinc-400">
+          Top Product
+        </p>
+
+        <h3 className="text-2xl font-semibold text-yellow-500 mt-2">
+       {topProduct?.[0]}
+        </h3>
+
+        <p className="mt-2">
+          Units Sold:
+          {" "}
+         {topProduct?.[1]}
+        </p>
+
+      </div>
+
+      <div className="space-y-3">
+
+        {bestSellingProducts.map(
+          (
+            product,
+            index
+          ) => (
+            <div
+              key={
+                product[0]
+              }
+              className="bg-black rounded-xl p-4 flex justify-between"
+            >
+
+              <span>
+                #{index + 1}
+                {" "}
+                {
+                  product[0]
+                }
+              </span>
+
+              <span className="text-yellow-500">
+                {
+                  product[1]
+                }
+                {" "}
+                sold
+              </span>
+
+            </div>
+          )
+        )}
+
+      </div>
+    </>
+  )}
+
+</div>
           {/* Quick Insights */}
 
 <div className="mt-12 bg-zinc-900 rounded-3xl p-8">

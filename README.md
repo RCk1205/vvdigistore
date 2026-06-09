@@ -1,36 +1,293 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VVDigiStore
 
-## Getting Started
+A full-stack luxury ecommerce platform built with Next.js, MongoDB, NextAuth, Razorpay, Cloudinary, and Tailwind CSS.
 
-First, run the development server:
+---
+
+# Features
+
+## Customer Features
+
+* User Registration
+* User Login
+* Secure Authentication
+* Product Browsing
+* Product Search
+* Product Filtering
+* Product Details Page
+* Related Products
+* Wishlist
+* Shopping Cart
+* Coupon System
+* Checkout
+* Cash On Delivery
+* Razorpay Online Payment
+* Order History
+* Order Tracking Timeline
+* Mobile Responsive Design
+
+---
+
+## Admin Features
+
+* Admin Authentication
+
+* Product Management
+
+  * Add Product
+  * Edit Product
+  * Delete Product
+
+* Inventory Management
+
+  * Stock Tracking
+  * Low Stock Detection
+  * Out Of Stock Protection
+
+* Order Management
+
+  * View Orders
+  * Update Status
+  * Track Customer Orders
+
+* Coupon Management
+
+  * Create Coupons
+  * Disable Coupons
+  * Delete Coupons
+  * Usage Limits
+  * Expiry Dates
+  * Coupon Placement Control
+
+---
+
+# Tech Stack
+
+## Frontend
+
+* Next.js 16
+* React
+* TypeScript
+* Tailwind CSS
+
+## Backend
+
+* Next.js API Routes
+
+## Database
+
+* MongoDB
+
+## Authentication
+
+* NextAuth
+
+## Payments
+
+* Razorpay
+
+## Media Storage
+
+* Cloudinary
+
+## Deployment
+
+* Vercel
+
+---
+
+# Installation
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+# Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Create:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+.env.local
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Add:
 
-## Deploy on Vercel
+```env
+MONGODB_URI=
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+NEXT_PUBLIC_RAZORPAY_KEY_ID=
+
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
+
+ADMIN_EMAIL=
+
+GMAIL_USER=
+GMAIL_APP_PASSWORD=
+```
+
+---
+
+# Database Setup
+
+Create MongoDB collections:
+
+```text
+products
+orders
+users
+coupons
+couponUsage
+newsletter
+gallery
+blog
+```
+
+---
+
+# Admin Access
+
+Admin email must match:
+
+```env
+ADMIN_EMAIL=
+```
+
+Admin users can access:
+
+```text
+/admin
+/admin/products
+/admin/orders
+/admin/coupons
+```
+
+Non-admin users are redirected to:
+
+```text
+/unauthorized
+```
+
+---
+
+# Payment Gateway
+
+Razorpay is integrated.
+
+Supported methods:
+
+* UPI
+* Credit Card
+* Debit Card
+* Net Banking
+* Wallets
+
+---
+
+# Inventory System
+
+Inventory automatically updates after successful order placement.
+
+Features:
+
+* Stock deduction
+* Out-of-stock protection
+* Low stock warning
+
+---
+
+# Coupon System
+
+Features:
+
+* Percentage Discounts
+* Fixed Discounts
+* Usage Limits
+* Expiry Dates
+* Minimum Order Amount
+* One User One Use Restriction
+* Homepage Coupon Banners
+
+---
+
+# Deployment
+
+Push code:
+
+```bash
+git add .
+git commit -m "update"
+git push origin main
+```
+
+Deploy using Vercel.
+
+Required environment variables must be configured inside Vercel Project Settings.
+
+---
+
+# Folder Structure
+
+```text
+app/
+components/
+context/
+lib/
+public/
+
+app/api/
+app/admin/
+app/products/
+app/cart/
+app/checkout/
+app/accounts/
+```
+
+---
+
+# Future Roadmap
+
+* Email Notifications
+* Product Reviews
+* Product Ratings
+* Save For Later
+* Analytics Dashboard
+* User Management
+* Returns & Refunds
+* Address Book
+* SEO Enhancements
+
+---
+
+# License
+
+Private Project
+
+Copyright © VVDigiStore

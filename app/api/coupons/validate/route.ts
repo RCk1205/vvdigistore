@@ -30,7 +30,15 @@ export async function POST(req: Request) {
         code.toUpperCase(),
       userEmail,
     });
+console.log(
+  "VALIDATE EMAIL:",
+  userEmail
+);
 
+console.log(
+  "VALIDATE COUPON:",
+  code
+);
 if (existingUsage) {
   return Response.json({
     success: false,

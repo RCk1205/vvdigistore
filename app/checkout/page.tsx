@@ -179,10 +179,13 @@ const orderData = {
       await response.json();
 
     if (!data.success) {
-      throw new Error(
-        "Failed to save order"
-      );
-    }
+  alert(
+    data.error ||
+    "Failed to save order"
+  );
+
+  return;
+}
 
     return data.orderId;
   };
@@ -195,13 +198,17 @@ const orderData = {
 
       try {
         const orderId =
-          await saveOrder();
+  await saveOrder();
 
-        clearCart();
+if (!orderId) {
+  return;
+}
 
-        router.push(
-          `/order-success?orderId=${orderId}`
-        );
+clearCart();
+
+router.push(
+  `/order-success?orderId=${orderId}`
+);
       } catch (error) {
         console.error(error);
 
@@ -522,6 +529,60 @@ const orderId =
     ? "Applied"
     : "Apply"}
 </button>
+
+  </div>
+
+</div>
+<div className="mb-10">
+
+  <h2 className="text-3xl mb-6">
+    Order Summary
+  </h2>
+
+  <div className="space-y-4">
+
+    {cart.map((item) => (
+      <div
+        key={item.id}
+        className="bg-zinc-900 rounded-2xl p-4 flex gap-4"
+      >
+
+        <img
+          src={item.image}
+          alt={item.name}
+          className="w-20 h-20 object-cover rounded-xl"
+        />
+
+        <div className="flex-1">
+
+          <h3 className="font-semibold">
+            {item.name}
+          </h3>
+
+          <p className="text-zinc-400">
+            Quantity: {item.quantity}
+          </p>
+
+          <p className="text-yellow-500">
+            ₹{item.price}
+          </p>
+
+        </div>
+
+        <div className="text-right">
+
+          <p className="font-semibold">
+            ₹
+            {(
+              Number(item.price) *
+              item.quantity
+            ).toLocaleString()}
+          </p>
+
+        </div>
+
+      </div>
+    ))}
 
   </div>
 

@@ -8,7 +8,9 @@ export async function GET() {
       .db("luxurystore")
       .collection("coupons")
       .find({})
-      .sort({ createdAt: -1 })
+      .sort({
+        createdAt: -1,
+      })
       .toArray();
 
     return Response.json(coupons);
@@ -20,18 +22,22 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request
+) {
   try {
     const client = await clientPromise;
 
-    const coupon = await req.json();
+    const coupon =
+      await req.json();
 
     await client
       .db("luxurystore")
       .collection("coupons")
       .insertOne({
         ...coupon,
-        createdAt: new Date(),
+        createdAt:
+          new Date(),
       });
 
     return Response.json({
@@ -45,11 +51,51 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function PUT(
+  req: Request
+) {
   try {
     const client = await clientPromise;
 
-    const { code } = await req.json();
+    const {
+      code,
+      active,
+    } = await req.json();
+
+    await client
+      .db("luxurystore")
+      .collection("coupons")
+      .updateOne(
+        {
+          code:
+            code.toUpperCase(),
+        },
+        {
+          $set: {
+            active,
+          },
+        }
+      );
+
+    return Response.json({
+      success: true,
+    });
+  } catch (error) {
+    return Response.json({
+      success: false,
+      error: String(error),
+    });
+  }
+}
+
+export async function DELETE(
+  req: Request
+) {
+  try {
+    const client = await clientPromise;
+
+    const { code } =
+      await req.json();
 
     await client
       .db("luxurystore")

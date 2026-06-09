@@ -14,6 +14,24 @@ export default function CouponBanner({
   const [coupons, setCoupons] =
     useState<any[]>([]);
 
+  const copyCoupon = async (
+    code: string
+  ) => {
+    try {
+      await navigator.clipboard.writeText(
+        code
+      );
+
+      alert(
+        `Coupon ${code} copied`
+      );
+    } catch {
+      alert(
+        "Failed to copy coupon"
+      );
+    }
+  };
+
   useEffect(() => {
     const loadCoupons =
       async () => {
@@ -59,33 +77,54 @@ export default function CouponBanner({
   }
 
   return (
-    <div className="bg-yellow-500 text-black py-4 px-6 text-center font-semibold">
+    <div className="bg-yellow-500 text-black py-4 px-6">
 
-      {coupons.map(
-        (
-          coupon,
-          index
-        ) => (
-          <div
-            key={
-              coupon._id ||
-              index
-            }
-          >
-            Use Coupon{" "}
-            <span className="font-bold">
-              {
-                coupon.code
+      <div className="max-w-7xl mx-auto space-y-3">
+
+        {coupons.map(
+          (
+            coupon,
+            index
+          ) => (
+            <div
+              key={
+                coupon._id ||
+                index
               }
-            </span>{" "}
-            and get{" "}
-            {coupon.type ===
-            "percentage"
-              ? `${coupon.value}% OFF`
-              : `₹${coupon.value} OFF`}
-          </div>
-        )
-      )}
+              className="flex flex-col md:flex-row items-center justify-between gap-3"
+            >
+              <div className="font-semibold text-center md:text-left">
+
+                Use Coupon{" "}
+                <span className="font-bold text-lg">
+                  {
+                    coupon.code
+                  }
+                </span>{" "}
+                and get{" "}
+                {coupon.type ===
+                "percentage"
+                  ? `${coupon.value}% OFF`
+                  : `₹${coupon.value} OFF`}
+
+              </div>
+
+              <button
+                onClick={() =>
+                  copyCoupon(
+                    coupon.code
+                  )
+                }
+                className="bg-black text-yellow-500 px-5 py-2 rounded-xl font-semibold hover:opacity-90"
+              >
+                Copy Code
+              </button>
+
+            </div>
+          )
+        )}
+
+      </div>
 
     </div>
   );

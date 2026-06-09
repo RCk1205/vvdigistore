@@ -26,7 +26,37 @@ export async function POST(req: Request) {
     
 
     const order = await req.json();
+if (
+  order.couponCode &&
+  order.userEmail
+) {
+  const existingUsage =
+    await client
+      .db("luxurystore")
+      .collection(
+        "couponUsage"
+      )
+      .findOne({
+        couponCode:
+          order.couponCode
+            .toUpperCase(),
+        userEmail:
+          order.userEmail,
+      });
 
+  if (existingUsage) {
+    return Response.json(
+      {
+        success: false,
+        error:
+          "You have already used this coupon",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+}
 const db =
   client.db(
     "luxurystore"

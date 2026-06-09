@@ -53,6 +53,60 @@ export default function AccountPage() {
       }
     };
 
+  const getStatusColor = (
+  status: string
+) => {
+  switch (status) {
+    case "Delivered":
+      return "bg-green-600";
+
+    case "Shipped":
+      return "bg-blue-600";
+
+    case "Processing":
+      return "bg-yellow-600";
+
+    case "Cancelled":
+      return "bg-red-600";
+
+    default:
+      return "bg-zinc-600";
+  }
+};
+
+const getStatusStep = (
+  status: string
+) => {
+  switch (status) {
+    case "Pending":
+      return 1;
+
+    case "Processing":
+      return 2;
+
+    case "Shipped":
+      return 3;
+
+    case "Delivered":
+      return 4;
+
+    default:
+      return 1;
+  }
+};
+
+  const getPaymentColor = (
+    status: string
+  ) => {
+    switch (status) {
+      case "Paid":
+        return "bg-green-600";
+
+      default:
+        return "bg-orange-600";
+    }
+  };
+
   if (
     status === "loading" ||
     loading
@@ -60,6 +114,7 @@ export default function AccountPage() {
     return (
       <>
         <Navbar />
+
         <main className="min-h-screen bg-black text-white pt-40 px-6">
           Loading...
         </main>
@@ -114,59 +169,274 @@ export default function AccountPage() {
                 No orders found.
               </p>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-10">
 
                 {orders.map(
                   (order) => (
                     <div
-                      key={
-                        order._id
-                      }
-                      className="border border-zinc-800 rounded-2xl p-6"
+                      key={order._id}
+                      className="border border-zinc-800 rounded-3xl overflow-hidden"
                     >
-                      <p>
-                        <strong>
-                          Order ID:
-                        </strong>{" "}
-                        {order._id}
-                      </p>
 
-                      <p>
-                        <strong>
-                          Status:
-                        </strong>{" "}
-                        {
-                          order.status
-                        }
-                      </p>
+                      {/* Header */}
 
-                      <p>
-                        <strong>
-                          Payment:
-                        </strong>{" "}
-                        {
-                          order.paymentStatus
-                        }
-                      </p>
+                      <div className="bg-zinc-950 p-6 border-b border-zinc-800">
 
-                      <p>
-                        <strong>
-                          Total:
-                        </strong>{" "}
-                        ₹
-                        {
-                          order.total
-                        }
-                      </p>
+                        <div className="flex flex-wrap gap-4 justify-between">
 
-                      <p>
-                        <strong>
-                          Date:
-                        </strong>{" "}
-                        {new Date(
-                          order.createdAt
-                        ).toLocaleDateString()}
-                      </p>
+                          <div>
+                            <p className="text-zinc-400 text-sm">
+                              ORDER ID
+                            </p>
+
+                            <p className="break-all">
+                              {order._id}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-zinc-400 text-sm">
+                              ORDER DATE
+                            </p>
+
+                            <p>
+                              {new Date(
+                                order.createdAt
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-zinc-400 text-sm">
+                              TOTAL
+                            </p>
+
+                            <p className="text-yellow-500 font-semibold">
+                              ₹{order.total}
+                            </p>
+                          </div>
+
+                        </div>
+
+                        <div className="flex gap-3 mt-5 flex-wrap">
+
+                          <span
+                            className={`px-4 py-2 rounded-full text-sm ${getStatusColor(
+                              order.status
+                            )}`}
+                          >
+                            {order.status}
+                          </span>
+
+                          <span
+                            className={`px-4 py-2 rounded-full text-sm ${getPaymentColor(
+                              order.paymentStatus
+                            )}`}
+                          >
+                            Payment:{" "}
+                            {
+                              order.paymentStatus
+                            }
+                          </span>
+
+                          {order.couponCode && (
+                            <span className="px-4 py-2 rounded-full text-sm bg-purple-700">
+                              Coupon:{" "}
+                              {
+                                order.couponCode
+                              }
+                            </span>
+                          )}
+
+                        </div>
+
+                      </div>
+{/* Timeline */}
+
+<div className="p-6 border-b border-zinc-800">
+
+  <h3 className="text-2xl mb-6">
+    Order Progress
+  </h3>
+
+  <div className="flex justify-between items-center">
+
+    {[
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Delivered",
+    ].map(
+      (
+        step,
+        index
+      ) => {
+        const active =
+          getStatusStep(
+            order.status
+          ) >=
+          index + 1;
+
+        return (
+          <div
+            key={step}
+            className="flex flex-col items-center flex-1"
+          >
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                active
+                  ? "bg-green-600"
+                  : "bg-zinc-700"
+              }`}
+            >
+              {index + 1}
+            </div>
+
+            <p className="mt-2 text-sm text-center">
+              {step}
+            </p>
+          </div>
+        );
+      }
+    )}
+
+  </div>
+
+</div>
+                      {/* Products */}
+
+                      <div className="p-6">
+
+                        <h3 className="text-2xl mb-6">
+                          Ordered Items
+                        </h3>
+
+                        <div className="space-y-5">
+
+                          {order.items?.map(
+                            (
+                              item: any
+                            ) => (
+                              <div
+                                key={item.id}
+                                className="bg-zinc-950 rounded-2xl p-4 flex flex-col md:flex-row gap-5"
+                              >
+
+                                <img
+                                  src={
+                                    item.image
+                                  }
+                                  alt={
+                                    item.name
+                                  }
+                                  className="w-28 h-28 object-cover rounded-xl"
+                                />
+
+                                <div className="flex-1">
+
+                                  <h4 className="text-xl font-semibold">
+                                    {
+                                      item.name
+                                    }
+                                  </h4>
+
+                                  <p className="text-yellow-500 mt-2">
+                                    ₹
+                                    {
+                                      item.price
+                                    }
+                                  </p>
+
+                                  <p className="text-zinc-400 mt-1">
+                                    Quantity:
+                                    {" "}
+                                    {
+                                      item.quantity
+                                    }
+                                  </p>
+
+                                  <p className="text-zinc-400 mt-1">
+                                    Subtotal:
+                                    {" "}
+                                    ₹
+                                    {item.price *
+                                      item.quantity}
+                                  </p>
+
+                                </div>
+
+                              </div>
+                            )
+                          )}
+
+                        </div>
+
+                      </div>
+
+                      {/* Shipping */}
+
+                      <div className="border-t border-zinc-800 p-6">
+
+                        <h3 className="text-2xl mb-4">
+                          Shipping Details
+                        </h3>
+
+                        <div className="bg-zinc-950 rounded-2xl p-5">
+
+                          <p>
+                            <strong>
+                              Name:
+                            </strong>{" "}
+                            {
+                              order.customer
+                                ?.name
+                            }
+                          </p>
+
+                          <p className="mt-2">
+                            <strong>
+                              Email:
+                            </strong>{" "}
+                            {
+                              order.customer
+                                ?.email
+                            }
+                          </p>
+
+                          <p className="mt-2">
+                            <strong>
+                              Phone:
+                            </strong>{" "}
+                            {
+                              order.customer
+                                ?.phone
+                            }
+                          </p>
+
+                          <p className="mt-2">
+                            <strong>
+                              City:
+                            </strong>{" "}
+                            {
+                              order.customer
+                                ?.city
+                            }
+                          </p>
+
+                          <p className="mt-2">
+                            <strong>
+                              Address:
+                            </strong>{" "}
+                            {
+                              order.customer
+                                ?.address
+                            }
+                          </p>
+
+                        </div>
+
+                      </div>
+
                     </div>
                   )
                 )}

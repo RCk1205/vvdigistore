@@ -155,6 +155,29 @@ export default function CouponsPage() {
 
       loadCoupons();
     };
+    const toggleCoupon =
+  async (
+    couponCode: string,
+    active: boolean
+  ) => {
+    await fetch(
+      "/api/coupons",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          code:
+            couponCode,
+          active,
+        }),
+      }
+    );
+
+    loadCoupons();
+  };
 
   return (
     <>
@@ -385,15 +408,68 @@ export default function CouponsPage() {
                           "Unlimited"
                         }
                       </p>
+                      <p className="text-zinc-500 text-sm">
+  Used:
+  {" "}
+  {coupon.usedCount || 0}
+</p>
+
+<p className="text-zinc-500 text-sm">
+  Remaining:
+  {" "}
+  {coupon.usageLimit
+    ? coupon.usageLimit -
+      (coupon.usedCount || 0)
+    : "Unlimited"}
+</p>
+
+<p className="text-zinc-500 text-sm">
+  Status:
+  {" "}
+  <span
+    className={
+      coupon.active
+        ? "text-green-500"
+        : "text-red-500"
+    }
+  >
+    {coupon.active
+      ? "Active"
+      : "Inactive"}
+  </span>
+</p>
 
                       <p className="text-zinc-500 text-sm">
-                        Expiry:
-                        {" "}
-                        {
-                          coupon.expiryDate ??
-                          "No Expiry"
-                        }
-                      </p>
+  Expiry:
+  {" "}
+  {coupon.expiryDate
+    ? new Date(
+        coupon.expiryDate
+      ).toLocaleDateString()
+    : "No Expiry"}
+</p>
+
+<p className="text-zinc-500 text-sm">
+  Expiry Status:
+  {" "}
+  <span
+    className={
+      coupon.expiryDate &&
+      new Date(
+        coupon.expiryDate
+      ) < new Date()
+        ? "text-red-500"
+        : "text-green-500"
+    }
+  >
+    {coupon.expiryDate &&
+    new Date(
+      coupon.expiryDate
+    ) < new Date()
+      ? "Expired"
+      : "Valid"}
+  </span>
+</p>
 
                       <p className="text-zinc-500 text-sm">
                         {
@@ -409,16 +485,38 @@ export default function CouponsPage() {
 
                     </div>
 
-                    <button
-                      onClick={() =>
-                        deleteCoupon(
-                          coupon.code
-                        )
-                      }
-                      className="bg-red-600 px-4 py-2 rounded-lg"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-3">
+
+  <button
+    onClick={() =>
+      toggleCoupon(
+        coupon.code,
+        !coupon.active
+      )
+    }
+    className={`px-4 py-2 rounded-lg ${
+      coupon.active
+        ? "bg-orange-600"
+        : "bg-green-600"
+    }`}
+  >
+    {coupon.active
+      ? "Disable"
+      : "Enable"}
+  </button>
+
+  <button
+    onClick={() =>
+      deleteCoupon(
+        coupon.code
+      )
+    }
+    className="bg-red-600 px-4 py-2 rounded-lg"
+  >
+    Delete
+  </button>
+
+</div>
 
                   </div>
                 )

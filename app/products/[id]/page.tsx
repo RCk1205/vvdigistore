@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Navbar from "../../../components/Navbar";
 import AddToCartButton from "../../../components/AddToCartButton";
 import AddToWishlistButton from "../../../components/AddToWishlistButton";
@@ -19,7 +20,44 @@ async function getProduct(id: string) {
 
   return response.json();
 }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
 
+  const product =
+    await getProduct(id);
+
+  if (!product) {
+    return {
+      title:
+        "Product Not Found",
+    };
+  }
+
+  return {
+    title: product.name,
+
+    description:
+      product.description ||
+      `${product.name} available at VVDigiStore.`,
+
+    openGraph: {
+      title:
+        product.name,
+
+      description:
+        product.description ||
+        `${product.name} available at VVDigiStore.`,
+
+      images: [
+        product.image,
+      ],
+    },
+  };
+}
 function getStockStatus(stock: number) {
   if (stock <= 0) {
     return {
@@ -122,24 +160,47 @@ export default async function ProductPage({
 
            <div className="flex gap-4 flex-wrap">
 
-  <AddToCartButton
-    product={{
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      stock: product.stock ?? 0,
-    }}
-  />
+  {(product.stock ?? 0) > 0 ? (
+    <>
+      <AddToCartButton
+        product={{
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          stock:
+            product.stock ?? 0,
+        }}
+      />
 
-  <AddToWishlistButton
-    product={{
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-    }}
-  />
+      <AddToWishlistButton
+        product={{
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+        }}
+      />
+    </>
+  ) : (
+    <>
+      <button
+        disabled
+        className="bg-zinc-700 text-zinc-400 px-8 py-4 rounded-xl cursor-not-allowed"
+      >
+        Out Of Stock
+      </button>
+
+      <AddToWishlistButton
+        product={{
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+        }}
+      />
+    </>
+  )}
 
 </div>
 
